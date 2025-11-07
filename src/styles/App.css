@@ -381,14 +381,16 @@ tbody tr:last-child td {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #044040 0%, #044040 100%);
+  background: linear-gradient(135deg, #D92525 0%, #BC1F2B 100%);
   transition: width 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 0.85rem;
-  font-weight: bold;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.5px;
 }
 
 /* Tooltips */
