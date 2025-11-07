@@ -6,7 +6,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #BC1F2B 0%, #591C21 100%);
   min-height: 100vh;
   padding: 20px;
 }
@@ -25,7 +25,7 @@ body {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #BC1F2B 0%, #591C21 100%);
   color: white;
   padding: 30px;
   text-align: center;
@@ -69,12 +69,12 @@ body {
 }
 
 .tab-button:hover {
-  color: #667eea;
+  color: #D92525;
 }
 
 .tab-button.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: #D92525;
+  border-bottom-color: #D92525;
 }
 
 /* Cards */
@@ -100,7 +100,7 @@ body {
   content: '';
   width: 4px;
   height: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #BC1F2B 0%, #591C21 100%);
   border-radius: 2px;
 }
 
@@ -128,8 +128,8 @@ body {
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #044040;
+  box-shadow: 0 0 0 3px rgba(4, 64, 64, 0.1);
 }
 
 /* Buttons */
@@ -147,25 +147,25 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #044040 0%, #044040 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(4, 64, 64, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 16px rgba(4, 64, 64, 0.5);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, #D92525 0%, #BC1F2B 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+  box-shadow: 0 4px 12px rgba(217, 37, 37, 0.4);
 }
 
 .btn-danger:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(245, 87, 108, 0.5);
+  box-shadow: 0 6px 16px rgba(217, 37, 37, 0.5);
 }
 
 .btn-secondary {
@@ -193,11 +193,11 @@ body {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #044040 0%, #044040 100%);
   color: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(4, 64, 64, 0.3);
 }
 
 .stat-label {
@@ -225,7 +225,7 @@ table {
 }
 
 thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #BC1F2B 0%, #591C21 100%);
   color: white;
 }
 
@@ -303,15 +303,15 @@ tbody tr:last-child td {
 }
 
 .block-ocupado {
-  background: #667eea;
+  background: #044040;
   color: white;
-  border: 2px solid #5568d3;
+  border: 2px solid #033030;
 }
 
 .block-indirecto {
-  background: #f093fb;
+  background: #D92525;
   color: white;
-  border: 2px solid #e27fe9;
+  border: 2px solid #BC1F2B;
 }
 
 .block-inodo {
@@ -381,7 +381,7 @@ tbody tr:last-child td {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #044040 0%, #044040 100%);
   transition: width 0.3s;
   display: flex;
   align-items: center;
@@ -416,7 +416,7 @@ tbody tr:last-child td {
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border-top: 4px solid #044040;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
