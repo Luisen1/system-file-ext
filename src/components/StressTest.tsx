@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { SistemaArchivosExt, Snapshot } from '../services/FileSystem';
+import * as XLSX from 'xlsx-js-style';
 
 interface StressTestProps {
   fileSystem: SistemaArchivosExt;
@@ -181,6 +182,155 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
     };
   }, [snapshots]);
 
+  const exportarExcel = () => {
+    if (snapshots.length === 0) {
+      alert('Primero debes ejecutar la prueba de estrés');
+      return;
+    }
+
+    try {
+      const wb = XLSX.utils.book_new();
+
+      // Estilo para encabezados
+      const headerStyle = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "1ABC9C" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      // 1. HOJA: Tabla de Evolución del Sistema
+      const datosTabla = [
+        ['Snapshot', 'Operación', 'Archivos Activos', 'Bloques Ocupados', 'Fragmentación (%)', 'Inodos Libres', 'Bloques Libres']
+      ];
+
+      snapshots.forEach((s, i) => {
+        datosTabla.push([
+          String(i + 1),
+          String(s.operacion),
+          String(s.archivos_activos),
+          String(s.bloques_ocupados),
+          String(s.fragmentacion),
+          String(s.inodos_libres),
+          String(s.bloques_libres)
+        ]);
+      });
+
+      const wsTabla = XLSX.utils.aoa_to_sheet(datosTabla);
+      wsTabla['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 18 },
+        { wch: 18 }, { wch: 15 }, { wch: 15 }
+      ];
+
+      // Aplicar estilos a los encabezados
+      ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1'].forEach(cell => {
+        if (wsTabla[cell]) wsTabla[cell].s = headerStyle;
+      });
+
+      XLSX.utils.book_append_sheet(wb, wsTabla, 'Evolución del Sistema');
+
+      // 3. HOJA: Datos para Gráficos (Formato Optimizado)
+      const datosGrafico = [
+        ['Snapshot', 'Operación', 'Fragmentación (%)', 'Archivos Activos', 'Bloques Ocupados']
+      ];
+
+      datosFragmentacion.forEach((dato) => {
+        datosGrafico.push([
+          String(dato.snapshot),
+          String(dato.operacion),
+          String(dato.fragmentacion),
+          String(dato.archivos),
+          String(dato.bloques)
+        ]);
+      });
+
+      const wsGrafico = XLSX.utils.aoa_to_sheet(datosGrafico);
+      wsGrafico['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 18 }, { wch: 18 }
+      ];
+
+      const headerStyleOrange = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "FF8C42" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      ['A1', 'B1', 'C1', 'D1', 'E1'].forEach(cell => {
+        if (wsGrafico[cell]) wsGrafico[cell].s = headerStyleOrange;
+      });
+
+      XLSX.utils.book_append_sheet(wb, wsGrafico, 'Datos para Gráficos');
+
+      // 4. HOJA: Análisis Detallado
+      if (analisisFragmentacion) {
+        const datosAnalisis = [
+          ['Métrica', 'Valor'],
+          ['Fragmentación Máxima (%)', analisisFragmentacion.maxFragmentacion],
+          ['Snapshot con Max Fragmentación', analisisFragmentacion.indexMax + 1],
+          ['Operación del Pico', analisisFragmentacion.snapshotMax!.operacion],
+          ['Archivos en ese momento', analisisFragmentacion.snapshotMax!.archivos_activos],
+          ['Bloques ocupados', analisisFragmentacion.snapshotMax!.bloques_ocupados],
+          ['Inodos libres', analisisFragmentacion.snapshotMax!.inodos_libres],
+          ['Bloques libres', analisisFragmentacion.snapshotMax!.bloques_libres],
+          [''],
+          ['📊 ESTADÍSTICAS GENERALES'],
+          ['Promedio Fragmentación (%)', (datosFragmentacion.reduce((sum, d) => sum + d.fragmentacion, 0) / datosFragmentacion.length).toFixed(2)],
+          ['Promedio Archivos Activos', Math.round(datosFragmentacion.reduce((sum, d) => sum + d.archivos, 0) / datosFragmentacion.length)],
+          ['Promedio Bloques Ocupados', Math.round(datosFragmentacion.reduce((sum, d) => sum + d.bloques, 0) / datosFragmentacion.length)]
+        ];
+
+        const wsAnalisis = XLSX.utils.aoa_to_sheet(datosAnalisis);
+        wsAnalisis['!cols'] = [{ wch: 35 }, { wch: 20 }];
+
+        const headerStyleGold = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "F39C12" } },
+          alignment: { horizontal: "center", vertical: "center" }
+        };
+
+        if (wsAnalisis['A1']) wsAnalisis['A1'].s = headerStyleGold;
+        if (wsAnalisis['B1']) wsAnalisis['B1'].s = headerStyleGold;
+
+        // Resaltar valores clave
+        if (wsAnalisis['B2']) {
+          wsAnalisis['B2'].s = {
+            font: { bold: true, sz: 14, color: { rgb: "E63946" } },
+            alignment: { horizontal: "center" }
+          };
+        }
+
+        XLSX.utils.book_append_sheet(wb, wsAnalisis, 'Análisis');
+      }
+
+      // 5. HOJA: Logs de Operaciones
+      const datosLogs = [['N°', 'Log de Operación']];
+      logs.slice(0, 100).forEach((log, i) => {
+        datosLogs.push([String(i + 1), log]);
+      });
+
+      const wsLogs = XLSX.utils.aoa_to_sheet(datosLogs);
+      wsLogs['!cols'] = [{ wch: 8 }, { wch: 85 }];
+
+      const headerStyleBlue = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "3498DB" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      if (wsLogs['A1']) wsLogs['A1'].s = headerStyleBlue;
+      if (wsLogs['B1']) wsLogs['B1'].s = headerStyleBlue;
+
+      XLSX.utils.book_append_sheet(wb, wsLogs, 'Logs de Operaciones');
+
+      // Generar y descargar el archivo
+      XLSX.writeFile(wb, 'resultados_ext.xlsx');
+
+      alert('✅ Archivo Excel generado con éxito!');
+    } catch (error) {
+      console.error('Error al generar Excel:', error);
+      alert('❌ Error al generar el archivo Excel. Ver consola para detalles.');
+    }
+  };
+
   return (
     <div>
       <div className="card">
@@ -193,13 +343,29 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
           </p>
         </div>
 
-        <button
-          onClick={ejecutarPrueba}
-          className="btn btn-primary"
-          disabled={ejecutando}
-        >
-          {ejecutando ? `Ejecutando... (${operacionActual}/100)` : 'Iniciar Prueba'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            onClick={ejecutarPrueba}
+            className="btn btn-primary"
+            disabled={ejecutando}
+          >
+            {ejecutando ? `Ejecutando... (${operacionActual}/100)` : 'Iniciar Prueba'}
+          </button>
+
+          {snapshots.length > 0 && (
+            <button
+              onClick={exportarExcel}
+              className="btn btn-secondary"
+              style={{ 
+                background: '#1abc9c', 
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              📊 Exportar a Excel
+            </button>
+          )}
+        </div>
 
         {ejecutando && (
           <div className="progress-bar" style={{ marginTop: '20px' }}>

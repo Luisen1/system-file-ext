@@ -20,6 +20,7 @@ Este proyecto es un **simulador educativo interactivo** del sistema de archivos 
 - ✅ Operaciones CRUD (crear, eliminar, listar archivos)
 - ✅ Visualización gráfica del disco en tiempo real
 - ✅ Prueba de estrés automatizada con 100 operaciones
+- ✅ **Exportación de resultados a Excel (XLSX)**
 - ✅ Análisis de fragmentación y limitaciones del sistema
 - ✅ Interfaz moderna con diseño minimalista
 - ✅ Código optimizado con React hooks (useMemo, useCallback)
@@ -262,6 +263,36 @@ La prueba genera una gráfica que muestra la evolución de la fragmentación a l
 - Momentos críticos del sistema
 - Relación entre operaciones y fragmentación
 
+### 📊 Exportación a Excel
+
+Una vez ejecutada la prueba de estrés, puedes **exportar todos los resultados a Excel** con un solo clic:
+
+**Archivo generado:** `resultados_ext.xlsx`
+
+**Contenido del archivo:**
+1. **Hoja "Evolución del Sistema"**: Tabla completa con los 5 snapshots
+   - Snapshot, Operación, Archivos Activos, Bloques Ocupados
+   - Fragmentación (%), Inodos Libres, Bloques Libres
+
+2. **Hoja "Datos Fragmentación"**: Datos para gráficos
+   - Snapshot, Operación, Fragmentación, Archivos, Bloques
+
+3. **Hoja "Análisis"**: Métricas clave
+   - Fragmentación máxima alcanzada
+   - Snapshot donde ocurrió el pico
+   - Estado del sistema en ese momento
+
+4. **Hoja "Logs de Operaciones"**: Registro completo
+   - Primeras 100 operaciones ejecutadas
+   - Tipo de operación (crear/eliminar)
+   - Resultado (éxito/fallo)
+
+**Cómo usar:**
+1. Ejecuta la prueba de estrés con el botón "Iniciar Prueba"
+2. Espera a que termine (100 operaciones)
+3. Haz clic en el botón "📊 Exportar a Excel"
+4. El archivo `resultados_ext.xlsx` se descargará automáticamente
+
 ---
 
 ## 📊 Interfaz de Usuario
@@ -311,6 +342,7 @@ La prueba genera una gráfica que muestra la evolución de la fragmentación a l
 | **TypeScript** | 5.3.3 | Tipado estático |
 | **Vite** | 5.0.8 | Build tool y dev server |
 | **Recharts** | 2.10.3 | Gráficas interactivas |
+| **XLSX** | 0.18.5 | Exportación a Excel |
 | **CSS3** | - | Estilos personalizados |
 
 ### Optimizaciones Aplicadas
@@ -358,29 +390,14 @@ Posibles extensiones del proyecto:
 
 ## 👤 Autor
 
-**[Luis Enrique](https://github.com/Luisen1)**  
+**[Luisen Hernandez](https://github.com/Luisen1)**  
 8vo Semestre - Sistemas Operativos  
-Universidad  
+Universidad Pedagogica y Tecnologica de Colombia (UPTC)
 Noviembre 2025
 
 [![GitHub](https://img.shields.io/badge/GitHub-Luisen1-181717?logo=github)](https://github.com/Luisen1)
 
----
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
----
-
-## 🙏 Agradecimientos
-
-- Sistema de archivos Ext original de Linux
-- Documentación del kernel Linux (Ext4)
-- Comunidad de React y TypeScript
-- Recursos educativos de Sistemas Operativos
-
----
 
 ## 📚 Referencias
 
