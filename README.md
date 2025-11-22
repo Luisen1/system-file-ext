@@ -269,20 +269,29 @@ Una vez ejecutada la prueba de estrés, puedes **exportar todos los resultados a
 
 **Archivo generado:** `resultados_ext.xlsx`
 
-**Contenido del archivo:**
+**Contenido del archivo (6 hojas):**
+
 1. **Hoja "Evolución del Sistema"**: Tabla completa con los 5 snapshots
    - Snapshot, Operación, Archivos Activos, Bloques Ocupados
    - Fragmentación (%), Inodos Libres, Bloques Libres
 
-2. **Hoja "Datos Fragmentación"**: Datos para gráficos
+2. **Hoja "Datos para Gráficos"**: Datos optimizados para visualización
    - Snapshot, Operación, Fragmentación, Archivos, Bloques
 
-3. **Hoja "Análisis"**: Métricas clave
-   - Fragmentación máxima alcanzada
-   - Snapshot donde ocurrió el pico
-   - Estado del sistema en ese momento
+3. **Hoja "Análisis"**: Métricas completas y análisis de rendimiento
+   - Fragmentación máxima alcanzada y snapshot del pico
+   - **📊 Estadísticas generales**: Promedios de fragmentación, archivos, bloques
+   - **⏱️ Análisis de rendimiento**: Tiempos de búsqueda (promedio, máximo, mínimo)
+   - **📂 Punteros indirectos**: Cantidad de archivos que requirieron puntero indirecto
+   - **⚠️ Limitaciones del sistema**: Tamaño máximo, número de inodos, algoritmo
+   - **💡 Mejoras propuestas**: Algoritmo Best-Fit, mejora esperada, complejidad
 
-4. **Hoja "Logs de Operaciones"**: Registro completo
+4. **Hoja "Tiempos de Búsqueda"**: Análisis detallado de rendimiento
+   - Tiempo de búsqueda de bloques libres en cada snapshot (en milisegundos)
+   - Correlación entre bloques ocupados, fragmentación y tiempo de búsqueda
+   - Archivos con puntero indirecto por snapshot
+
+5. **Hoja "Logs de Operaciones"**: Registro completo
    - Primeras 100 operaciones ejecutadas
    - Tipo de operación (crear/eliminar)
    - Resultado (éxito/fallo)
@@ -292,6 +301,13 @@ Una vez ejecutada la prueba de estrés, puedes **exportar todos los resultados a
 2. Espera a que termine (100 operaciones)
 3. Haz clic en el botón "📊 Exportar a Excel"
 4. El archivo `resultados_ext.xlsx` se descargará automáticamente
+
+**Análisis avanzado incluido:**
+- ⏱️ **Medición de tiempos**: Cada búsqueda de bloques libres se cronometra con precisión de microsegundos
+- 📈 **Análisis de rendimiento**: Compara tiempos entre snapshots para identificar degradación
+- 💡 **Propuesta de mejora**: Algoritmo Best-Fit con caché de segmentos contiguos
+- 📊 **Complejidad algorítmica**: O(n) actual vs O(log k) propuesto
+- 📂 **Uso de punteros indirectos**: Rastrea archivos >12 KB automáticamente
 
 ---
 
@@ -317,8 +333,17 @@ Una vez ejecutada la prueba de estrés, puedes **exportar todos los resultados a
    - Ver evolución del sistema en snapshots
    - Gráfica de fragmentación
    - Logs detallados de operaciones
+   - **Exportación completa a Excel**
+   - **Análisis completo de limitaciones**
 
-4. **Análisis**
+4. **Análisis de Limitaciones** (nuevo componente integrado)
+   - **⏱️ Tiempos de búsqueda**: Medición precisa de rendimiento en cada snapshot
+   - **💡 Propuesta de mejora**: Algoritmo Best-Fit con caché de segmentos
+   - **📂 Punteros indirectos**: Contador automático de archivos >12 KB
+   - **⚠️ Limitación 1 MB**: Análisis de archivo grande y soluciones en Ext4
+   - **🔄 Diferencias con Ext4**: Tabla comparativa completa
+
+5. **Análisis General**
    - Fragmentación externa
    - Eficiencia de búsqueda
    - Limitaciones del esquema de punteros
