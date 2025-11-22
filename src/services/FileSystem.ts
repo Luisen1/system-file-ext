@@ -45,6 +45,8 @@ export interface Snapshot {
   bloques_libres: number;
   archivos: ArchivoInfo[];
   timestamp: Date;
+  tiempo_busqueda_ms: number;
+  archivos_con_indirecto: number;
 }
 export class SistemaArchivosExt {
   superbloque: Superbloque;
@@ -54,6 +56,7 @@ export class SistemaArchivosExt {
   bitmap_bloques: boolean[];
   historial: OperacionHistorial[];
   operacionActual: number;
+  ultimoTiempoBusqueda: number;
 
   constructor() {
     this.superbloque = new Superbloque();
@@ -63,6 +66,7 @@ export class SistemaArchivosExt {
     this.bitmap_bloques = new Array(NUM_BLOQUES).fill(false);
     this.historial = [];
     this.operacionActual = 0;
+    this.ultimoTiempoBusqueda = 0;
   }
 
   crear_archivo(nombre: string, tamano_bytes: number): number {
@@ -293,6 +297,7 @@ export class SistemaArchivosExt {
   }
 
   buscarBloquesLibres(cantidad: number): number[] {
+    const inicio = performance.now();
     const bloques: number[] = [];
     
     for (let i = 0; i < this.bitmap_bloques.length && bloques.length < cantidad; i++) {
@@ -300,6 +305,9 @@ export class SistemaArchivosExt {
         bloques.push(i);
       }
     }
+    
+    const fin = performance.now();
+    this.ultimoTiempoBusqueda = fin - inicio;
     
     return bloques;
   }
@@ -342,6 +350,9 @@ export class SistemaArchivosExt {
     const stats = this.obtenerEstadisticas();
     const archivos = this.listar_archivos();
     
+    // Contar archivos que usan puntero indirecto
+    const archivosConIndirecto = this.inodos.filter(i => i.en_uso && i.puntero_indirecto !== -1).length;
+    
     return {
       operacion: this.operacionActual,
       archivos_activos: archivos.length,
@@ -350,7 +361,9 @@ export class SistemaArchivosExt {
       inodos_libres: stats.inodos_libres,
       bloques_libres: stats.bloques_libres,
       archivos: archivos,
-      timestamp: new Date()
+      timestamp: new Date(),
+      tiempo_busqueda_ms: this.ultimoTiempoBusqueda,
+      archivos_con_indirecto: archivosConIndirecto
     };
   }
 
@@ -362,5 +375,6 @@ export class SistemaArchivosExt {
     this.bitmap_bloques = new Array(NUM_BLOQUES).fill(false);
     this.historial = [];
     this.operacionActual = 0;
+    this.ultimoTiempoBusqueda = 0;
   }
 }
