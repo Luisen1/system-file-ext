@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { SistemaArchivosExt, Snapshot } from '../services/FileSystem';
 import * as XLSX from 'xlsx-js-style';
+import LimitationsAnalysis from './LimitationsAnalysis';
 
 interface StressTestProps {
   fileSystem: SistemaArchivosExt;
@@ -262,6 +263,12 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
 
       // 4. HOJA: Análisis Detallado
       if (analisisFragmentacion) {
+        // Calcular métricas de tiempo
+        const tiempoPromedio = snapshots.reduce((sum, s) => sum + s.tiempo_busqueda_ms, 0) / snapshots.length;
+        const tiempoMaximo = Math.max(...snapshots.map(s => s.tiempo_busqueda_ms));
+        const tiempoMinimo = Math.min(...snapshots.map(s => s.tiempo_busqueda_ms));
+        const totalArchivosIndirectos = snapshots[snapshots.length - 1].archivos_con_indirecto;
+
         const datosAnalisis = [
           ['Métrica', 'Valor'],
           ['Fragmentación Máxima (%)', analisisFragmentacion.maxFragmentacion],
@@ -275,7 +282,28 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
           ['📊 ESTADÍSTICAS GENERALES'],
           ['Promedio Fragmentación (%)', (datosFragmentacion.reduce((sum, d) => sum + d.fragmentacion, 0) / datosFragmentacion.length).toFixed(2)],
           ['Promedio Archivos Activos', Math.round(datosFragmentacion.reduce((sum, d) => sum + d.archivos, 0) / datosFragmentacion.length)],
-          ['Promedio Bloques Ocupados', Math.round(datosFragmentacion.reduce((sum, d) => sum + d.bloques, 0) / datosFragmentacion.length)]
+          ['Promedio Bloques Ocupados', Math.round(datosFragmentacion.reduce((sum, d) => sum + d.bloques, 0) / datosFragmentacion.length)],
+          [''],
+          ['⏱️ ANÁLISIS DE RENDIMIENTO'],
+          ['Tiempo Promedio de Búsqueda (ms)', tiempoPromedio.toFixed(4)],
+          ['Tiempo Máximo de Búsqueda (ms)', tiempoMaximo.toFixed(4)],
+          ['Tiempo Mínimo de Búsqueda (ms)', tiempoMinimo.toFixed(4)],
+          [''],
+          ['📂 PUNTEROS INDIRECTOS'],
+          ['Archivos con Puntero Indirecto', totalArchivosIndirectos],
+          ['% Archivos con Indirecto', ((totalArchivosIndirectos / snapshots[snapshots.length - 1].archivos_activos) * 100).toFixed(1) + '%'],
+          [''],
+          ['⚠️ LIMITACIONES DEL SISTEMA'],
+          ['Tamaño Máximo de Archivo (KB)', '268'],
+          ['Número Máximo de Inodos', '32'],
+          ['Bloques Totales Disponibles', '128'],
+          ['Algoritmo de Asignación', 'First-Fit Lineal'],
+          [''],
+          ['💡 MEJORAS PROPUESTAS'],
+          ['Algoritmo Sugerido', 'Best-Fit con Caché de Segmentos'],
+          ['Mejora Esperada en Tiempo', '~90%'],
+          ['Complejidad Actual', 'O(n) = O(128)'],
+          ['Complejidad Propuesta', 'O(log k) ≈ O(3)']
         ];
 
         const wsAnalisis = XLSX.utils.aoa_to_sheet(datosAnalisis);
@@ -301,7 +329,40 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
         XLSX.utils.book_append_sheet(wb, wsAnalisis, 'Análisis');
       }
 
-      // 5. HOJA: Logs de Operaciones
+      // 5. HOJA: Tiempos de Búsqueda
+      const datosTiempos = [
+        ['Snapshot', 'Operación', 'Tiempo Búsqueda (ms)', 'Bloques Ocupados', 'Fragmentación (%)', 'Archivos con Indirecto']
+      ];
+
+      snapshots.forEach((s, i) => {
+        datosTiempos.push([
+          String(i + 1),
+          String(s.operacion),
+          String(s.tiempo_busqueda_ms.toFixed(4)),
+          String(s.bloques_ocupados),
+          String(s.fragmentacion.toFixed(2)),
+          String(s.archivos_con_indirecto)
+        ]);
+      });
+
+      const wsTiempos = XLSX.utils.aoa_to_sheet(datosTiempos);
+      wsTiempos['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 20 }, { wch: 18 }, { wch: 18 }, { wch: 22 }
+      ];
+
+      const headerStylePurple = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "9B59B6" } },
+        alignment: { horizontal: "center", vertical: "center" }
+      };
+
+      ['A1', 'B1', 'C1', 'D1', 'E1', 'F1'].forEach(cell => {
+        if (wsTiempos[cell]) wsTiempos[cell].s = headerStylePurple;
+      });
+
+      XLSX.utils.book_append_sheet(wb, wsTiempos, 'Tiempos de Búsqueda');
+
+      // 6. HOJA: Logs de Operaciones
       const datosLogs = [['N°', 'Log de Operación']];
       logs.slice(0, 100).forEach((log, i) => {
         datosLogs.push([String(i + 1), log]);
@@ -477,6 +538,9 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
               ))}
             </div>
           </div>
+
+          {/* Análisis Completo de Limitaciones */}
+          <LimitationsAnalysis snapshots={snapshots} />
         </>
       )}
     </div>
