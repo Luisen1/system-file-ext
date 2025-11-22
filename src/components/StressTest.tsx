@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { SistemaArchivosExt, Snapshot } from '../services/FileSystem';
 
@@ -128,15 +128,14 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
 
       if (operacion.tipo === 'crear') {
         resultado = fileSystem.crear_archivo(operacion.nombre, operacion.tamano * 1024);
-        log = `Op ${operacion.op}: CREAR "${operacion.nombre}" (${operacion.tamano} KB) - ${resultado !== -1 ? '✓ Éxito' : '✗ Fallo'}`;
+        log = `Op ${operacion.op}: CREAR "${operacion.nombre}" (${operacion.tamano} KB) - ${resultado !== -1 ? 'Éxito' : 'Fallo'}`;
       } else {
-        // Buscar el inodo del archivo a eliminar
         const inodo = fileSystem.inodos.find(i => i.en_uso && i.nombre === operacion.nombre);
         if (inodo) {
           resultado = fileSystem.eliminar_archivo(inodo.id);
-          log = `Op ${operacion.op}: ELIMINAR "${operacion.nombre}" - ${resultado === 0 ? '✓ Éxito' : '✗ Fallo'}`;
+          log = `Op ${operacion.op}: ELIMINAR "${operacion.nombre}" - ${resultado === 0 ? 'Éxito' : 'Fallo'}`;
         } else {
-          log = `Op ${operacion.op}: ELIMINAR "${operacion.nombre}" - ✗ No encontrado`;
+          log = `Op ${operacion.op}: ELIMINAR "${operacion.nombre}" - No encontrado`;
         }
       }
 
@@ -157,14 +156,30 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
     setEjecutando(false);
   };
 
-  // Preparar datos para la gráfica de fragmentación
-  const datosFragmentacion: DatosFragmentacion[] = snapshots.map((s, i) => ({
-    snapshot: `Snapshot ${i + 1}`,
-    operacion: s.operacion,
-    fragmentacion: s.fragmentacion,
-    archivos: s.archivos_activos,
-    bloques: s.bloques_ocupados
-  }));
+  const datosFragmentacion = useMemo<DatosFragmentacion[]>(
+    () => snapshots.map((s, i) => ({
+      snapshot: `Snapshot ${i + 1}`,
+      operacion: s.operacion,
+      fragmentacion: s.fragmentacion,
+      archivos: s.archivos_activos,
+      bloques: s.bloques_ocupados
+    })),
+    [snapshots]
+  );
+
+  const analisisFragmentacion = useMemo(() => {
+    if (snapshots.length === 0) return null;
+    
+    const maxFragmentacion = Math.max(...snapshots.map(s => s.fragmentacion));
+    const snapshotMax = snapshots.find(s => s.fragmentacion === maxFragmentacion);
+    const indexMax = snapshots.indexOf(snapshotMax!);
+    
+    return {
+      maxFragmentacion,
+      snapshotMax,
+      indexMax
+    };
+  }, [snapshots]);
 
   return (
     <div>
@@ -183,7 +198,7 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
           className="btn btn-primary"
           disabled={ejecutando}
         >
-          {ejecutando ? `⏳ Ejecutando... (${operacionActual}/100)` : '▶️ Iniciar Prueba'}
+          {ejecutando ? `Ejecutando... (${operacionActual}/100)` : 'Iniciar Prueba'}
         </button>
 
         {ejecutando && (
@@ -257,30 +272,24 @@ const StressTest: React.FC<StressTestProps> = ({ fileSystem }) => {
               </LineChart>
             </ResponsiveContainer>
             
-            <div style={{ marginTop: '20px' }}>
-              <h4>Análisis:</h4>
-              {(() => {
-                const maxFragmentacion = Math.max(...snapshots.map(s => s.fragmentacion));
-                const snapshotMax = snapshots.find(s => s.fragmentacion === maxFragmentacion);
-                const indexMax = snapshots.indexOf(snapshotMax!);
-                
-                return (
-                  <ul style={{ lineHeight: '1.8' }}>
-                    <li>
-                      <strong>Pico máximo:</strong> {maxFragmentacion}% en Snapshot {indexMax + 1} (Operación {snapshotMax!.operacion})
-                    </li>
-                    <li>
-                      <strong>Razón:</strong> La fragmentación ocurre cuando se eliminan archivos 
-                      y se crean nuevos que no pueden ocupar bloques contiguos, dejando "huecos" en el disco.
-                    </li>
-                    <li>
-                      <strong>Momento crítico:</strong> Entre las operaciones 21-80, donde se alternan 
-                      creaciones y eliminaciones, causando máxima fragmentación.
-                    </li>
-                  </ul>
-                );
-              })()}
-            </div>
+            {analisisFragmentacion && (
+              <div style={{ marginTop: '20px' }}>
+                <h4>Análisis:</h4>
+                <ul style={{ lineHeight: '1.8' }}>
+                  <li>
+                    <strong>Pico máximo:</strong> {analisisFragmentacion.maxFragmentacion}% en Snapshot {analisisFragmentacion.indexMax + 1} (Operación {analisisFragmentacion.snapshotMax!.operacion})
+                  </li>
+                  <li>
+                    <strong>Razón:</strong> La fragmentación ocurre cuando se eliminan archivos 
+                    y se crean nuevos que no pueden ocupar bloques contiguos, dejando "huecos" en el disco.
+                  </li>
+                  <li>
+                    <strong>Momento crítico:</strong> Entre las operaciones 21-80, donde se alternan 
+                    creaciones y eliminaciones, causando máxima fragmentación.
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Logs de Operaciones */}
