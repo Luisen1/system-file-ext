@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MAX_FILE_SIZE, BLOCK_SIZE } from '../config/constants';
 
 interface FileCreatorProps {
   onCreateFile: (nombre: string, tamano_bytes: number) => number;
@@ -10,9 +11,6 @@ interface Mensaje {
   texto: string;
 }
 
-/**
- * Componente para crear archivos
- */
 const FileCreator: React.FC<FileCreatorProps> = ({ onCreateFile, disabled }) => {
   const [nombre, setNombre] = useState<string>('');
   const [tamano, setTamano] = useState<string>('');
@@ -21,19 +19,24 @@ const FileCreator: React.FC<FileCreatorProps> = ({ onCreateFile, disabled }) => 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (!nombre || !tamano) {
-      setMensaje({ tipo: 'error', texto: 'Por favor complete todos los campos' });
+    if (!nombre.trim() || !tamano) {
+      setMensaje({ tipo: 'error', texto: 'Completa ambos campos para continuar' });
       return;
     }
 
-    const tamanoBytes = parseInt(tamano) * 1024; // Convertir KB a bytes
+    const tamanoBytes = parseInt(tamano) * BLOCK_SIZE;
     
     if (tamanoBytes <= 0) {
-      setMensaje({ tipo: 'error', texto: 'El tamaño debe ser mayor a 0' });
+      setMensaje({ tipo: 'error', texto: 'El tamaño debe ser mayor a 0 KB' });
       return;
     }
 
-    const resultado = onCreateFile(nombre, tamanoBytes);
+    if (tamanoBytes > MAX_FILE_SIZE) {
+      setMensaje({ tipo: 'error', texto: `El tamaño máximo es ${MAX_FILE_SIZE / BLOCK_SIZE} KB` });
+      return;
+    }
+
+    const resultado = onCreateFile(nombre.trim(), tamanoBytes);
     
     if (resultado !== -1) {
       setMensaje({ 
@@ -45,11 +48,10 @@ const FileCreator: React.FC<FileCreatorProps> = ({ onCreateFile, disabled }) => 
     } else {
       setMensaje({ 
         tipo: 'error', 
-        texto: 'Error al crear el archivo. Verifique los recursos disponibles.' 
+        texto: 'No se pudo crear el archivo. Revisa el espacio disponible.' 
       });
     }
 
-    // Limpiar mensaje después de 5 segundos
     setTimeout(() => setMensaje(null), 5000);
   };
 
@@ -65,38 +67,38 @@ const FileCreator: React.FC<FileCreatorProps> = ({ onCreateFile, disabled }) => 
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Nombre del archivo:</label>
+          <label>Nombre:</label>
           <input
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="ejemplo.txt"
+            placeholder="documento.txt"
             maxLength={32}
             disabled={disabled}
           />
           <small style={{ color: '#888', fontSize: '0.85rem' }}>
-            Máximo 32 caracteres
+            Máx. 32 caracteres
           </small>
         </div>
 
         <div className="form-group">
-          <label>Tamaño (KB):</label>
+          <label>Tamaño (en KB):</label>
           <input
             type="number"
             value={tamano}
             onChange={(e) => setTamano(e.target.value)}
-            placeholder="5"
+            placeholder="10"
             min="1"
             max="268"
             disabled={disabled}
           />
           <small style={{ color: '#888', fontSize: '0.85rem' }}>
-            Máximo 268 KB (268 bloques)
+            Máx. 268 KB
           </small>
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={disabled}>
-          ➕ Crear Archivo
+          Crear Archivo
         </button>
       </form>
     </div>

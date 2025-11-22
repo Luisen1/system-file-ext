@@ -3,19 +3,16 @@ import { ArchivoInfo } from '../services/FileSystem';
 
 interface FileListProps {
   archivos: ArchivoInfo[];
-  onDeleteFile: (id: number, nombre: string) => void;
+  onDeleteFile: (id: number) => void;
 }
 
-/**
- * Componente para listar archivos del sistema
- */
 const FileList: React.FC<FileListProps> = ({ archivos, onDeleteFile }) => {
   if (archivos.length === 0) {
     return (
       <div className="card">
         <h3>Lista de Archivos</h3>
         <div className="alert alert-info">
-          📂 No hay archivos en el sistema. Crea uno para comenzar.
+          No hay archivos en el sistema. Crea uno para comenzar.
         </div>
       </div>
     );
@@ -50,7 +47,7 @@ const FileList: React.FC<FileListProps> = ({ archivos, onDeleteFile }) => {
                 </td>
                 <td>
                   <span className={`badge ${archivo.fragmentado ? 'badge-warning' : 'badge-success'}`}>
-                    {archivo.fragmentado ? '⚠️ Sí' : '✓ No'}
+                    {archivo.fragmentado ? 'Sí' : 'No'}
                   </span>
                 </td>
                 <td>
@@ -58,11 +55,11 @@ const FileList: React.FC<FileListProps> = ({ archivos, onDeleteFile }) => {
                 </td>
                 <td>
                   <button
-                    onClick={() => onDeleteFile(archivo.id, archivo.nombre)}
+                    onClick={() => onDeleteFile(archivo.id)}
                     className="btn btn-danger"
                     style={{ padding: '6px 12px', fontSize: '0.9rem' }}
                   >
-                    🗑️ Eliminar
+                    Eliminar
                   </button>
                 </td>
               </tr>

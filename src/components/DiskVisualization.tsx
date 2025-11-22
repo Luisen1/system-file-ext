@@ -1,35 +1,34 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EstadoDisco } from '../services/FileSystem';
+import { NUM_BLOQUES } from '../config/constants';
 
 interface DiskVisualizationProps {
   bloques: EstadoDisco[];
 }
 
-/**
- * Componente para visualizar el estado del disco
- */
 const DiskVisualization: React.FC<DiskVisualizationProps> = ({ bloques }) => {
-  // Contar bloques por tipo
-  const libres = bloques.filter(b => b.tipo === 'libre').length;
-  const ocupados = bloques.filter(b => b.tipo === 'ocupado').length;
-  const indirectos = bloques.filter(b => b.tipo === 'indirecto').length;
+  const stats = useMemo(() => ({
+    libres: bloques.filter(b => b.tipo === 'libre').length,
+    ocupados: bloques.filter(b => b.tipo === 'ocupado').length,
+    indirectos: bloques.filter(b => b.tipo === 'indirecto').length
+  }), [bloques]);
 
   return (
     <div className="card">
-      <h3>Estado del Disco (128 Bloques)</h3>
+      <h3>Estado del Disco ({NUM_BLOQUES} Bloques)</h3>
       
       <div className="legend">
         <div className="legend-item">
           <div className="legend-color block-libre"></div>
-          <span>Libre ({libres})</span>
+          <span>Libre ({stats.libres})</span>
         </div>
         <div className="legend-item">
           <div className="legend-color block-ocupado"></div>
-          <span>Ocupado ({ocupados})</span>
+          <span>Ocupado ({stats.ocupados})</span>
         </div>
         <div className="legend-item">
           <div className="legend-color block-indirecto"></div>
-          <span>Indirecto ({indirectos})</span>
+          <span>Indirecto ({stats.indirectos})</span>
         </div>
       </div>
 
